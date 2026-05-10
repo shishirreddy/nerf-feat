@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local data, checkpoints, and generated visualizations.
+bop/
+data/
+ruapc/
+runs/
+*.pth
+*.npy
+*.jpg
+*.png
+*.ply
+
+# Allow committed split files.
+!splits/
+!splits/**
+!splits/**/*.npy

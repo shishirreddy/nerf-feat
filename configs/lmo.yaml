@@ -1,0 +1,25 @@
+# Linemod-Occlusion (LM-O) inference configuration.
+#
+# LM-O has no training split of its own. Models are trained on LM (lm.yaml)
+# and evaluated on the LM-O test set. This config is only used for inference:
+#
+#   python inference.py --config configs/lmo.yaml --object-id 1
+#
+# LM-O object IDs: 1, 5, 6, 8, 9, 10, 11, 12
+
+paths:
+  dataset_root: bop/lmo      # LM-O test images
+  output_root: lm_out        # reuse models trained on LM
+  mask_root: segmentation_mask
+
+inference:
+  dataset_name: lmo
+  split_name: test
+  image_size: 224
+  crop_scale: 1.2
+  apply_mask_to_crop: true
+  downsample: 3
+  scale_camera_for_downsampling: true
+  pnp_iterations: 500
+  pnp_reprojection_error: 2.0
+  add_threshold_fraction: 0.1

@@ -1,0 +1,138 @@
+# T-LESS experiment configuration.
+#
+# Key differences from Linemod (lm.yaml):
+#   - All real training images are used; no random split.
+#     Generate split files with --all to include every frame:
+#       python split_dataset.py --config configs/tless.yaml --object-id 1 --all
+#   - Training uses train_primesense; inference runs on the separate test_primesense set.
+#   - 30 objects (1–30).
+#
+# Typical run order:
+#   python split_dataset.py         --config configs/tless.yaml --object-id <id> --all
+#   python train_nerf.py            --config configs/tless.yaml --object-id <id>
+#   python generate_correspondences.py --config configs/tless.yaml --object-id <id>
+#   python train_pose.py            --config configs/tless.yaml --object-id <id>
+#   python export_features.py       --config configs/tless.yaml --object-id <id>
+#   python inference.py             --config configs/tless.yaml --object-id <id>
+
+paths:
+  dataset_root: bop/tless
+  output_root: tless_out
+  coco_root: data/coco
+  mask_root: segmentation_mask
+
+# Used by split_dataset.py (--all writes every frame as train_ids).
+split:
+  split_name: train_primesense
+
+nerf:
+  dataset_name: tless
+  split_name: train_primesense
+  use_siren: true
+  image_size: 200
+  learning_rate: 0.001
+  batch_size: 3
+  epochs: 500
+  log_interval: 50
+  checkpoint_interval: 500
+  preview_interval: 500
+  point_cloud_interval: 1000
+  checkpoint_10k_step: 10000
+  checkpoint_50k_step: 50000
+  mesh_threshold: 0.03
+  losses:
+    color_weight: 500.0
+    silhouette_weight: 500.0
+  renderer:
+    threshold_mode: false
+    eval_grid:
+      points_per_ray: 128
+    coarse:
+      rays_per_image: 400
+      points_per_ray: 64
+    fine:
+      rays_per_image: 400
+      points_per_ray: 256
+
+pose:
+  dataset_name: tless
+  split_name: train_primesense
+  use_siren: true
+  image_size: 224
+  points_per_sample: 1024
+  cache_negative_samples: true
+  mask_rays: true
+  key_noise: 0.001
+  batch_size: 16
+  total_updates: 60000
+  warmup_steps: 2000
+  num_workers: 8
+  occluder_split_name: train_primesense
+  cnn_learning_rate: 0.0003
+  feature_mlp_learning_rate: 0.00003
+  checkpoint_interval: 500
+  preview_interval: 500
+  log_interval: 50
+  losses:
+    feature_weight: 0.001
+    mask_weight: 0.001
+  renderer:
+    eval_grid:
+      points_per_ray: 128
+    monte_carlo:
+      rays_per_image: 50
+      points_per_ray: 128
+    density_threshold: 0.2
+    negative_mesh_threshold: 0.07
+    negative_sampling_passes: 20
+    negative_farthest_points: 80000
+    max_negative_point_abs: 1.2
+    negative_surface_distance: 0.05
+    radius_outlier_points: 16
+    radius_outlier_distance: 0.05
+
+export:
+  dataset_name: tless
+  split_name: train_primesense
+  use_siren: true
+  image_size: 224
+  candidate_passes: 19
+  farthest_points: 80000
+  max_point_abs: 1.2
+  mesh_threshold: 0.05
+  surface_distance: 0.05
+  renderer:
+    density_threshold: 0.2
+    eval_grid:
+      points_per_ray: 128
+    monte_carlo:
+      rays_per_image: 30
+      points_per_ray: 128
+
+correspondences:
+  dataset_name: tless
+  split_name: train_primesense
+  use_siren: true
+  image_size: 224
+  export_normals: true
+  mask_rays: true
+  samples_per_ray: 256
+  density_threshold: 0.2
+  mesh_threshold: 0.2
+  normal_sample_count: 1000
+  normal_neighborhood_size: 400
+  mesh_radius_outlier_points: 20
+  mesh_radius_outlier_distance: 0.05
+  surface_distance: 0.1
+
+inference:
+  dataset_name: tless
+  split_name: test_primesense   # separate test set — different from training split
+  image_size: 224
+  crop_scale: 1.2
+  apply_mask_to_crop: true
+  downsample: 3
+  scale_camera_for_downsampling: true
+  pnp_iterations: 500
+  pnp_reprojection_error: 2.0
+  add_threshold_fraction: 0.1
