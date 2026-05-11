@@ -4,11 +4,7 @@
 
 NeRF-Feat estimates the 6D pose of objects without requiring a CAD model. A NeRF is first trained on a small set of posed RGB images to implicitly reconstruct the object's geometry. A CNN is then trained jointly with the NeRF using contrastive loss, producing view-invariant 2D features that align with the NeRF's implicit 3D surface. At inference, correspondences between CNN features and the NeRF's surface are established and solved with PnP-RANSAC.
 
-![Pipeline](assets/pipeline.png)
-
 The method handles symmetric objects naturally — the contrastive objective encourages features to be consistent across symmetrically equivalent views rather than treating them as ambiguous.
-
-![Correspondences](assets/correspondences.png)
 
 ---
 
